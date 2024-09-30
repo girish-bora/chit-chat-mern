@@ -7,9 +7,11 @@ import { GET_DM_CONTACTS_ROUTES } from "@/utils/constants";
 import { useEffect } from "react";
 import { useAppStore } from "@/store/store";
 import ContactList from "./components/ContactList";
+import NewGroup from "../chat-container/components/NewGroup";
 
 const ContactsContainer = () => {
-  const { directMessagesContacts, setDirectMessagesContacts } = useAppStore();
+  const { directMessagesContacts, setDirectMessagesContacts, channels } =
+    useAppStore();
 
   useEffect(() => {
     const getContacts = async () => {
@@ -40,6 +42,10 @@ const ContactsContainer = () => {
       <div className="my-5">
         <div className="flex items-center justify-between pr-10">
           <Title text="Group Messages" />
+          <NewGroup />
+        </div>
+        <div className="max-h-[38vh] overflow-y-auto scrollbar-hidden">
+          <ContactList contacts={channels} isChannel={true} />
         </div>
       </div>
       <ProfileInfo />
