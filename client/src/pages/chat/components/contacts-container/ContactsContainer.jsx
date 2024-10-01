@@ -3,15 +3,22 @@ import NewDM from "../chat-container/components/NewDM";
 import Logo from "./components/Logo";
 import ProfileInfo from "./components/ProfileInfo";
 import Title from "./components/Title";
-import { GET_DM_CONTACTS_ROUTES } from "@/utils/constants";
+import {
+  GET_DM_CONTACTS_ROUTES,
+  GET_USER_CHANNELS_ROUTE,
+} from "@/utils/constants";
 import { useEffect } from "react";
 import { useAppStore } from "@/store/store";
 import ContactList from "./components/ContactList";
 import NewGroup from "../chat-container/components/NewGroup";
 
 const ContactsContainer = () => {
-  const { directMessagesContacts, setDirectMessagesContacts, channels } =
-    useAppStore();
+  const {
+    directMessagesContacts,
+    setDirectMessagesContacts,
+    channels,
+    setChannels,
+  } = useAppStore();
 
   useEffect(() => {
     const getContacts = async () => {
@@ -22,8 +29,19 @@ const ContactsContainer = () => {
         setDirectMessagesContacts(response.data.contacts);
       }
     };
+
+    const getChannels = async () => {
+      const response = await apiClient.get(GET_USER_CHANNELS_ROUTE, {
+        withCredentials: true,
+      });
+      if (response.data.groups) {
+        setChannels(response.data.groups);
+      }
+    };
+
+    getChannels();
     getContacts();
-  }, []);
+  }, [setChannels, setDirectMessagesContacts]);
 
   return (
     <div className="relative w-full md:w-[35vw] lg:w-[30vw] xl:w-[22vw] bg-[#1b1c24] border-r-2 border-[#2f303b]">

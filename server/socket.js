@@ -1,5 +1,6 @@
 import { Server as SocketIOServer } from "socket.io";
 import Message from "./models/message.model.js";
+import Group from "./models/group.model.js";
 
 const setupSocket = (server) => {
   const io = new SocketIOServer(server, {
@@ -40,6 +41,43 @@ const setupSocket = (server) => {
     }
   };
 
+  const sendChannelMessage = async (message) => {
+    const { channelId, sender, content, messageType, fileURL } = message;
+
+    const createdMessage = await Message.create({
+      sender,
+      receiver: null,
+      content,
+      messageType,
+      fileURL,
+    });
+
+    const messageData = await Message.findById(createdMessage._id)
+      .populate("sender", "id email firstName lastName image color")
+      .exec();
+
+    await Group.findByIdAndUpdate(channelId, {
+      $push: { messages: createdMessage._id },
+    });
+
+    const channel = await Group.findById(channelId).populate("members");
+
+    const finalData = { ...messageData._doc, channelId: channel._id };
+
+    if (channel && channel.members) {
+      channel.members.forEach((member) => {
+        const memberSocketId = userSocketMap.get(member._id.toString());
+        if (memberSocketId) {
+          io.to(memberSocketId).emit("receiveChannelMessage", finalData);
+        }
+      });
+      const adminSocketId = userSocketMap.get(channel.admin._id.toString());
+      if (adminSocketId) {
+        io.to(adminSocketId).emit("receiveChannelMessage", finalData);
+      }
+    }
+  };
+
   io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId;
 
@@ -51,6 +89,7 @@ const setupSocket = (server) => {
     }
 
     socket.on("sendMessage", sendMessage);
+    socket.on("sendChannelMessage", sendChannelMessage);
     socket.on("disconnect", () => disconnect(socket));
   });
 };

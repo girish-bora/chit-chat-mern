@@ -18,3 +18,5 @@ export const UPLOAD_FILE_ROUTE = `${MESSAGES_ROUTES}/upload-file`;
 
 export const CHANNEL_ROUTES = "api/group";
 export const CREATE_CHANNEL_ROUTE = `${CHANNEL_ROUTES}/create-group`;
+export const GET_USER_CHANNELS_ROUTE = `${CHANNEL_ROUTES}/get-user-groups`;
+export const GET_CHANNEL_MESSAGES_ROUTE = `${CHANNEL_ROUTES}/get-group-messages`;
